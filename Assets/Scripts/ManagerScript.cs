@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class ManagerScript : MonoBehaviour
 {
     // Start is called before the first frame update
+    System.Random _rand;
+    TagList tagList;
     public GameObject _baby_1;
     public GameObject _baby_2;
     public GameObject _baby_3;
@@ -18,24 +20,28 @@ public class ManagerScript : MonoBehaviour
     public GameObject _Prefab_bottle;
     public GameObject _Prefab_binky;
     public GameObject _Prefab_drugs;
-    List<GameObject> _prefabs;
-
     public Text Inventory_text;
-    List<string> inventory;
-    AudioSource source;
     public AudioClip crying;
-    System.Random _rand;
+
+    List<GameObject> _prefabs;
+    List<GameObject> bbies;
+    List<string> inventory;
+    List<string> _inmap;
+    Dictionary<GameObject, bool> mapping;
+    static Dictionary<string, string> _heirs;
+ 
     const int _num_bby = 8;
     float dice;
-    List<GameObject> bbies;
-    Dictionary<GameObject, bool> mapping;
+
+    AudioSource source;
+
     void Start()
     {
         mapping = new Dictionary<GameObject, bool>();
         source = gameObject.GetComponent<AudioSource>();
         bbies = new List<GameObject>();
         inventory = new List<string>();
-
+        tagList = new TagList();
         _prefabs = new List<GameObject>();
         _prefabs.Add(_Prefab_note);
         _prefabs.Add(_Prefab_drugs);
@@ -51,6 +57,12 @@ public class ManagerScript : MonoBehaviour
         bbies.Add(_baby_6);
         bbies.Add(_baby_7);
         bbies.Add(_baby_8);
+
+        _heirs = new Dictionary<string, string>();
+        _heirs.Add("piano", "note");
+        _heirs.Add("plant", "cannabis");
+        _heirs.Add("table", "bottle");
+        _heirs.Add("crib", "binky");
     }
 
     // Update is called once per frame
@@ -71,38 +83,75 @@ public class ManagerScript : MonoBehaviour
          
         }
     }
-
+    //generate items after collision with objects
     public void GenerateItems(GameObject item)
     {
-        if (_rand.Next(10) == 0)
-        {
-            float flip = Random.value;
+        bool in_ = false;
+        string val = "";
 
-            if (flip > .5)
+        // Looking up which object is provided by this collision
+        if (item.tag.Equals(tagList.tagPiano))
+        {
+            val = tagList.tagNote;
+        }
+        else if (item.tag.Equals(tagList.tagTable))
+        {
+            val = tagList.tagBottle;
+        }
+        else if (item.tag.Equals(tagList.tagCrib))
+        {
+            val = tagList.tagBinky;
+        }
+        else if(item.tag.Equals(tagList.tagPlant))
+        {
+            val = tagList.tagDrug;
+        }
+        print("debugg1");
+        print(item.tag);
+        print(val);
+        print("debugg bool" + in_);
+        // check if we have any already that object
+        for(int k =0; k < _inmap.Count; k++)
+        {
+            if (_inmap[k].Equals(val))
             {
-                GameObject temp = null;
-                if (item.tag.Equals("piano"))
-                {
-                    temp = _Prefab_note;
-                }
-                else if (item.tag.Equals("table"))
-                {
-                    temp = _Prefab_bottle;
-                }
-                else if (item.tag.Equals("crib"))
-                {
-                    temp = _Prefab_binky;
-                }
-                else if (item.tag.Equals("plant"))
-                {
-                    temp = _Prefab_drugs;
-                }
-                int radius = _rand.Next(5);
-                int i = _rand.Next(_prefabs.Count);
-                GameObject _note = Instantiate(temp, new Vector2(item.transform.position.x + radius, item.transform.position.y + radius), Quaternion.identity);
+                in_ = true;
             }
         }
-       
+        
+        //if we have it do nothing otherwise generate it
+        //if (!in_)
+        //{
+        print("debugg here " + item.name);
+        GameObject temp = null;
+            
+            if (item.tag.Equals(tagList.tagPiano))
+            {
+            print("debugg here");
+                temp = _Prefab_note;
+            }
+            else if (item.tag.Equals(tagList.tagTable))
+            {
+                temp = _Prefab_bottle;
+            }
+            else if (item.tag.Equals(tagList.tagCrib))
+            {
+                temp = _Prefab_binky;
+            }
+            else if (item.tag.Equals(tagList.tagPlant))
+            {
+                temp = _Prefab_drugs;
+            }
+            int radius = _rand.Next(5);
+            while (radius < 1)
+            {
+                radius = _rand.Next(5);
+            }
+            print("debugg2");
+            int i = _rand.Next(_prefabs.Count);
+            GameObject _note = Instantiate(temp, new Vector2(item.transform.position.x + radius, item.transform.position.y + radius), Quaternion.identity);
+            _inmap.Add(temp.name);
+        //}
     }
     public void UpdateInventory(GameObject item)
     {
@@ -114,7 +163,8 @@ public class ManagerScript : MonoBehaviour
         }
         if (diff)
         {
-            this.inventory.Add(item.name);
+            string name = item.name;
+            this.inventory.Add(name);
             string temp = "inventory\n";
             for (int i = 0; i < inventory.Count; i++)
             {
