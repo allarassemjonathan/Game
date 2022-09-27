@@ -27,23 +27,25 @@ public class PlayerScript : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         try
+        {   
+                
+        if  (collision.gameObject.tag.Equals("note")
+            || collision.gameObject.tag.Equals("bottle")
+            || collision.gameObject.tag.Equals("binky")
+            || collision.gameObject.tag.Equals("cannabis"))
         {
-            if (collision.gameObject != null)
-            {
-                if (collision.gameObject.name.Substring(0, "note".Length).Equals("note")
-                           || collision.gameObject.name.Substring(0, "bottle".Length).Equals("bottle")
-                           || collision.gameObject.name.Substring(0, "binky".Length).Equals("binky")
-                           || collision.gameObject.name.Substring(0, "cannabis".Length).Equals("cannabis"))
-                {
-                    _manager.UpdateInventory(collision.gameObject);
-                }
-            }
-           
+            _manager.UpdateInventory(collision.gameObject);
+        }
+        else
+        {
+            _manager.GenerateItems(collision.gameObject);
+        }
         }
         catch(Exception e)
         {
             print(e.Message);
         }
+
         
     }
 }

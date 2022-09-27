@@ -21,7 +21,7 @@ public class ManagerScript : MonoBehaviour
     List<GameObject> _prefabs;
 
     public Text Inventory_text;
-    List<GameObject> inventory;
+    List<string> inventory;
     AudioSource source;
     public AudioClip crying;
     System.Random _rand;
@@ -34,7 +34,7 @@ public class ManagerScript : MonoBehaviour
         mapping = new Dictionary<GameObject, bool>();
         source = gameObject.GetComponent<AudioSource>();
         bbies = new List<GameObject>();
-        inventory = new List<GameObject>();
+        inventory = new List<string>();
 
         _prefabs = new List<GameObject>();
         _prefabs.Add(_Prefab_note);
@@ -66,30 +66,59 @@ public class ManagerScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_rand.Next(50) == 0)
+        if (_rand.Next(100) == 0)
         {
-            float x = (float)_rand.Next(-10, 10);
-            float y = (float)_rand.Next(-10, 10);
-            int i = _rand.Next(_prefabs.Count);
-            GameObject _note = Instantiate(_prefabs[i], new Vector2(x, y), Quaternion.identity);
-
+         
         }
     }
 
+    public void GenerateItems(GameObject item)
+    {
+        if (_rand.Next(10) == 0)
+        {
+            float flip = Random.value;
+
+            if (flip > .5)
+            {
+                GameObject temp = null;
+                if (item.tag.Equals("piano"))
+                {
+                    temp = _Prefab_note;
+                }
+                else if (item.tag.Equals("table"))
+                {
+                    temp = _Prefab_bottle;
+                }
+                else if (item.tag.Equals("crib"))
+                {
+                    temp = _Prefab_binky;
+                }
+                else if (item.tag.Equals("plant"))
+                {
+                    temp = _Prefab_drugs;
+                }
+                int radius = _rand.Next(5);
+                int i = _rand.Next(_prefabs.Count);
+                GameObject _note = Instantiate(temp, new Vector2(item.transform.position.x + radius, item.transform.position.y + radius), Quaternion.identity);
+            }
+        }
+       
+    }
     public void UpdateInventory(GameObject item)
     {
         bool diff = true;
+        //if the item is not in the inventory
         for(int i = 0; i < inventory.Count; i++)
         {
-            diff &= !item.name.Equals(inventory[i].name);
+            diff &= !item.name.Equals(inventory[i]);
         }
         if (diff)
         {
-            this.inventory.Add(item);
+            this.inventory.Add(item.name);
             string temp = "inventory\n";
             for (int i = 0; i < inventory.Count; i++)
             {
-                temp = temp + (char)(i + 65) + " " + inventory[i].name.Substring(0, inventory[i].name.Length - 7) + "\n";
+                temp = temp + (char)(i + 65) + " " + inventory[i].Substring(0, inventory[i].Length - 7) + "\n";
             }
             Inventory_text.text = temp;
             Destroy(item);
